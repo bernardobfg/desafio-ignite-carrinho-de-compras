@@ -64,10 +64,16 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
   const removeProduct = (productId: number) => {
     try {
       const updatedCart = [...cart]
-      const newCart = updatedCart.filter(product => product.id !== productId);
-      setCart(newCart)
-      localStorage.setItem("@RocketShoes:cart", JSON.stringify(newCart))
-
+      const productIndex= updatedCart.findIndex(product => product.id === productId);
+      if (productIndex>= 0) {
+        updatedCart.splice(productIndex, 1);
+        setCart(updatedCart);
+        localStorage.setItem("@RocketShoes:cart", JSON.stringify(updatedCart));
+      }
+      else {
+        toast.error('Erro na remoção do produto')
+      }
+      
     } catch {
       toast.error('Erro na remoção do produto');
     }
@@ -78,6 +84,9 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
     amount,
   }: UpdateProductAmount) => {
     try {
+      if (amount < 1) {
+        throw new Error()
+      }
       const updatedCart = [...cart]
       const stock = await api.get(`stock/${productId}`);
       const stockAmount = stock.data.amount
